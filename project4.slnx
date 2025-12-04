@@ -3,3 +3,103 @@
 </Solution>
 
 ;kjfheoifjf
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <title></title>
+</head>
+<body>
+    <form>
+        <center>
+            <div class="container">
+                <h1 style="color:black" class="h"><b>ENTER THE DETAILS</b></h1><br /><br />
+                NAME   :<input type="text" id="name" class="name" style="color:white" /><br /><br />
+                EMAIL  :<input type="email" id="email" class="email" style="color:white" /><br /><br />
+                PHONE  :<input type="number" id="phone" class="phone" style="color:white" /><br /><br />
+                <select id="gender">
+                    <option value="">Select Gender</option>
+                </select>
+                <button type="button" id="button" onclick="Add()" style="background-color:cornflowerblue" class="submit">SUBMIT</button>
+            </div>
+        </center>
+    </form>
+    <script>
+            // Load gender dropdown on page load
+            $(document).ready(function () {
+                LoadGenderDropdown();
+            });
+            function LoadGenderDropdown() {
+                $.ajax({
+                    type: "POST",
+                    url: "WebForm1.aspx/GetDropdown",
+                    contentType: "application/json; charset=utf-8",
+                    dataType: "json",
+                    success: function (r) {
+                        if (r.d && r.d.gender) {
+                            const genderDropdown = document.getElementById("gender");
+                            console.log(genderDropdown)
+                            genderDropdown.innerHTML = '<option value="">Select Gender</option>';
+
+                            r.d.gender.forEach(function (item) {
+                                const option = document.createElement("option");
+                                option.value = item.Value;
+                                option.textContent = item.Text;
+                                genderDropdown.appendChild(option);
+                            });
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("Error loading gender dropdown:", error);
+                    }
+                });
+            }
+
+            function Add() {
+            let name = document.getElementById("name").value;
+            let email = document.getElementById("email").value.trim();
+            let mob = document.getElementById("phone").value.trim();
+            let gender = document.getElementById("gender").value;
+
+            if (!name || !email || !mob || !gender) {
+                alert("Please fill all fields!");
+            return;
+                }
+            console.log(name, mob, email, gender);
+
+            $.ajax({
+                type: "POST",
+            url: "WebForm1.aspx/Save",
+            data: JSON.stringify({
+            name: name,
+            mob: mob,
+            email: email,
+            gender: gender
+                    }),
+            contentType: "application/json; charset=utf-8",
+            dataType: "json",
+            success: function (r) {
+                        if (r.d) {
+                            const show = document.getElementById("show");
+            show.textContent = "Your registered ID Number - " + r.d;
+            show.classList.add("active");
+
+            document.getElementById("name").value = "";
+            document.getElementById("email").value = "";
+            document.getElementById("phone").value = "";
+            document.getElementById("gender").value = "";
+                        } else {
+                alert("Failed to get registration ID from server.");
+                        }
+                    },
+            error: function (xhr, status, error) {
+                console.error("Error:", error);
+            alert("Something went wrong with the server request.");
+                    }
+                });
+            }
+
+    </script>
+</body>
+</html>
